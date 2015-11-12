@@ -19,12 +19,22 @@ Base = declarative_base()
 Base.query = db_session.query_property()
 
 
+class ExhibitSection(Base):
+
+    __tablename__ = 'ExhbitSections'
+
+    ExhibitSectionID = Column(Integer, primary_key=True)
+    Name = Column(String)
+    Exhibits = relationship('Exhibit', backref='ExhibitSection')
+
+
 class Exhibit(Base):
 
     __tablename__ = 'Exhibits'
 
     ExhibitID = Column(Integer, primary_key=True)
     Name = Column(String)
+    ExhibitSectionID = Column(Integer, ForeignKey('ExhbitSections.ExhibitSectionID'))
     ViewControllerID = Column(Integer, ForeignKey('ViewControllers.ViewControllerID'))
     ViewController = relationship('ViewController')
     Text = Column(String)
