@@ -3,7 +3,8 @@ from flask import Flask
 from database import db_session, init_db, \
                      ViewController, MetadataInteger, Exhibit, ExhibitSection, \
                      MediaResource
-from flask.ext.restful import Resource, Api, fields, marshal, reqparse
+import marshallers
+from flask.ext.restful import Resource, Api, marshal_with, marshal, reqparse
 from sqlalchemy.exc import IntegrityError
 
 app = Flask(__name__)
@@ -76,19 +77,10 @@ class ViewControllerListAPI(Resource):
     Upon a get request returns
     """
 
-    get_return_fields = {
-        'name': fields.String,
-        'segueID': fields.String,
-        'revision': fields.Integer,
-    }
-
+    @marshal_with(marshallers.view_controller, envelope='view_controllers')
     def get(self):
-        all_vc = ViewController.query.all()
-        return {
-            'viewcontrollers': [
-                marshal(vc.__dict__, self.get_return_fields) for vc in all_vc
-            ]
-        }
+        view_controllers = ViewController.query.all()
+        return view_controllers
 
 
 class UpdateAPI(Resource):
@@ -98,45 +90,28 @@ class UpdateAPI(Resource):
     Get request takes a revision number as mandatory input.
     """
 
-    exhibit_return_fields = {
-        'name': fields.String,
-        'exhibitSectionID': fields.Integer,
-        'viewControllerID': fields.Integer,
-        'text': fields.String,
-        'resourceID': fields.Integer,
-    }
-    exhibit_section_return_fields = {
-        'exhibitsSectionID': fields.Integer,
-        'name': fields.String,
-    }
-    resource_return_fields = {
-        'resourceID': fields.Integer,
-        'url': fields.String,
-    }
-
+    @marshal_with(marshallers.update)
     def get(self):
         parser = reqparse.RequestParser()
         parser.add_argument('revision', type=int, required=True, help='Could not convert revision number to integer')
-
         args = parser.parse_args()
 
         # Get latest revision number
-        cur_revision = MetadataInteger.query.filter_by(key='revision').first().value
+        revision = MetadataInteger.query.filter_by(key='revision').first().value
 
-        # Get exhibit update data
+        # Get all table information
         exhibits = Exhibit.query.filter(Exhibit.revision > args.revision).all()
-        # Get exhibit section update data
         exhibit_sections = ExhibitSection.query.filter(ExhibitSection.revision > args.revision).all()
-        # Get resource update data
         resources = MediaResource.query.filter(MediaResource.revision > args.revision).all()
         return {
-            'exhibits': [marshal(exhibit.__dict__, self.exhibit_return_fields) for exhibit in exhibits],
-            'exhibit_sections': [marshal(exhibit_section.__dict__, self.exhibit_section_return_fields) for exhibit_section in exhibit_sections],
-            'resources': [marshal(resource.__dict__, self.resource_return_fields) for resource in resources],
-            'revision': cur_revision
+            'exhibits': exhibits,
+            'exhibit_sections': exhibit_sections,
+            'resources': resources,
+            'revision': revision
         }
 
 
+# Add all resources to the api
 api.add_resource(ViewControllerListAPI, '/viewcontrollers', endpoint='viewcontrollers')
 api.add_resource(UpdateAPI, '/update', endpoint='update')
 
