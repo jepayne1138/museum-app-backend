@@ -54,6 +54,20 @@ class ViewController(Base):
     revision = Column(Integer)
 
 
+class Event(Base):
+
+    __tablename__ = 'Events'
+
+    eventID = Column(Integer, primary_key=True)
+    name = Column(String)
+    description = Column(String)
+    resourceID = Column(Integer, ForeignKey('Resources.resourceID'))
+    resource = relationship('MediaResource')
+    startTime = Column(DateTime)
+    endTime = Column(DateTime)
+    revision = Column(Integer)
+
+
 class MediaResource(Base):
 
     __tablename__ = 'Resources'
