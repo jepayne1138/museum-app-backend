@@ -1,10 +1,10 @@
 import argparse
-from flask import Flask
+from flask import Flask, render_template
 from database import db_session, init_db, \
                      ViewController, MetadataInteger, Exhibit, ExhibitSection, \
                      MediaResource, Event
 import marshallers
-from flask.ext.restful import Resource, Api, marshal_with, marshal, reqparse
+from flask.ext.restful import Resource, Api, marshal_with, reqparse
 from sqlalchemy.exc import IntegrityError
 
 app = Flask(__name__)
@@ -116,6 +116,14 @@ class UpdateAPI(Resource):
 # Add all resources to the api
 api.add_resource(ViewControllerListAPI, '/viewcontrollers', endpoint='viewcontrollers')
 api.add_resource(UpdateAPI, '/update', endpoint='update')
+
+
+# Web interface ---------------------------------------------------------------
+
+
+@app.route('/')
+def index():
+    return render_template('index.html')
 
 
 # Run program -----------------------------------------------------------------
