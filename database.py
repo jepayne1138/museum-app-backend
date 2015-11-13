@@ -1,5 +1,5 @@
 import os
-from sqlalchemy import create_engine, Column, Integer, String, ForeignKey
+from sqlalchemy import create_engine, Column, Integer, String, DateTime, ForeignKey, func
 from sqlalchemy.orm import scoped_session, sessionmaker, relationship
 from sqlalchemy.ext.declarative import declarative_base
 
@@ -23,33 +23,52 @@ class ExhibitSection(Base):
 
     __tablename__ = 'ExhbitSections'
 
-    ExhibitSectionID = Column(Integer, primary_key=True)
-    Name = Column(String)
-    Exhibits = relationship('Exhibit', backref='ExhibitSection')
-
+    exhibitSectionID = Column(Integer, primary_key=True)
+    name = Column(String, nullable=True)
+    exhibits = relationship('Exhibit', backref='exhibitSection')
+    revision = Column(Integer)
 
 class Exhibit(Base):
 
     __tablename__ = 'Exhibits'
 
-    ExhibitID = Column(Integer, primary_key=True)
-    Name = Column(String)
-    ExhibitSectionID = Column(Integer, ForeignKey('ExhbitSections.ExhibitSectionID'))
-    ViewControllerID = Column(Integer, ForeignKey('ViewControllers.ViewControllerID'))
-    ViewController = relationship('ViewController')
-    Text = Column(String)
-    MediaPath = Column(String, nullable=True)
+    exhibitID = Column(Integer, primary_key=True)
+    name = Column(String)
+    exhibitSectionID = Column(Integer, ForeignKey('ExhbitSections.exhibitSectionID'))
+    viewControllerID = Column(Integer, ForeignKey('ViewControllers.viewControllerID'))
+    viewController = relationship('ViewController')
+    text = Column(String)
+    resourceID = Column(Integer, ForeignKey('Resources.resourceID'))
+    resource = relationship('MediaResource')
+    revision = Column(Integer)
 
 
 class ViewController(Base):
 
     __tablename__ = 'ViewControllers'
 
-    ViewControllerID = Column(Integer, primary_key=True)
-    Key = Column(String, unique=True)
-    Name = Column(String, unique=True)
-    SegueID = Column(String, unique=True)
+    viewControllerID = Column(Integer, primary_key=True)
+    key = Column(String, unique=True)
+    name = Column(String, unique=True)
+    segueID = Column(String, unique=True)
+    revision = Column(Integer)
 
+
+class MediaResource(Base):
+
+    __tablename__ = 'Resources'
+
+    resourceID = Column(Integer, primary_key=True)
+    url = Column(String, unique=True)
+    revision = Column(Integer)
+
+class MetadataInteger(Base):
+
+    __tablename__ = 'Metadata'
+
+    metadataIntegerID = Column(Integer, primary_key=True)
+    key = Column(String, unique=True)
+    value = Column(Integer)
 
 def init_db():
     Base.metadata.create_all(bind=engine)
