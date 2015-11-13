@@ -2,7 +2,7 @@ import argparse
 from flask import Flask
 from database import db_session, init_db, \
                      ViewController, MetadataInteger, Exhibit, ExhibitSection, \
-                     MediaResource
+                     MediaResource, Event
 import marshallers
 from flask.ext.restful import Resource, Api, marshal_with, marshal, reqparse
 from sqlalchemy.exc import IntegrityError
@@ -103,10 +103,12 @@ class UpdateAPI(Resource):
         exhibits = Exhibit.query.filter(Exhibit.revision > args.revision).all()
         exhibit_sections = ExhibitSection.query.filter(ExhibitSection.revision > args.revision).all()
         resources = MediaResource.query.filter(MediaResource.revision > args.revision).all()
+        events = Event.query.filter(Event.revision > args.revision).all()
         return {
             'exhibits': exhibits,
             'exhibit_sections': exhibit_sections,
             'resources': resources,
+            'events': events,
             'revision': revision
         }
 

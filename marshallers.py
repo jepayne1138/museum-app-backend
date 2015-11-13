@@ -38,5 +38,6 @@ update = {
     'exhibits': fields.List(fields.Nested(exhibit)),
     'exhibit_sections': fields.List(fields.Nested(exhibit_section)),
     'resources': fields.List(fields.Nested(resource)),
+    'events': fields.List(fields.Nested(event)),
     'revision': fields.Integer,
 }
