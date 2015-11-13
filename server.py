@@ -1,9 +1,13 @@
+"""Note that _formhelpers.html was taken from flask documentation
+http://flask.pocoo.org/docs/0.10/patterns/wtforms/
+"""
 import argparse
-from flask import Flask, render_template
+from flask import Flask, render_template, flash, request, redirect, url_for
 from database import db_session, init_db, \
                      ViewController, MetadataInteger, Exhibit, ExhibitSection, \
                      MediaResource, Event
 import marshallers
+import forms
 from flask.ext.restful import Resource, Api, marshal_with, reqparse
 from sqlalchemy.exc import IntegrityError
 
@@ -45,11 +49,17 @@ revision = MetadataInteger.query.filter_by(key='revision').first().value
 # Define ViewController objects
 view_controllers = {
     'text': ViewController(key='text', name='ExhibitTextViewController', segueID='toExhibitTextViewController', revision=revision),
-    'image': ViewController(key='image', name='ExhibitImageViewController', segueID='toExhibitImageViewController', revision=revision),
-    'video': ViewController(key='video', name='ExhibitVideoViewController', segueID='toExhibitVideoViewController', revision=revision),
-    'audio': ViewController(key='audio', name='ExhibitAudioViewController', segueID='toExhibitAudioViewController', revision=revision),
-    'web': ViewController(key='web', name='ExhibitWebViewController', segueID='toExhibitWebViewController', revision=revision),
+    # 'image': ViewController(key='image', name='ExhibitImageViewController', segueID='toExhibitImageViewController', revision=revision),
+    # 'video': ViewController(key='video', name='ExhibitVideoViewController', segueID='toExhibitVideoViewController', revision=revision),
+    # 'audio': ViewController(key='audio', name='ExhibitAudioViewController', segueID='toExhibitAudioViewController', revision=revision),
+    # 'web': ViewController(key='web', name='ExhibitWebViewController', segueID='toExhibitWebViewController', revision=revision),
 }
+# Initialize default empty exhibit section entry
+sessionAdd(ExhibitSection(exhibitSectionID=1, name=None, revision=revision))
+db_session.commit()
+# Initialize default empty resource entry
+sessionAdd(MediaResource(resourceID=1, url='', revision=revision))
+db_session.commit()
 
 
 # Populate default view controllers
@@ -122,8 +132,27 @@ api.add_resource(UpdateAPI, '/update', endpoint='update')
 
 
 @app.route('/')
+@app.route('/index')
 def index():
     return render_template('index.html')
+
+@app.route('/add-exhibit', methods=['GET', 'POST'])
+def add_exhibit():
+    form = forms.ExhibitForm(request.form)
+    if request.method == 'POST' and form.validate():
+        new_exhibit = Exhibit(
+            name=form.name.data,
+            exhibitSectionID=1,
+            viewControllerID=1,
+            text=form.text.data,
+            resourceID=1,
+            revision=revision,
+        )
+        sessionAdd(new_exhibit)
+        db_session.commit()
+        return redirect(url_for('index'))
+
+    return render_template('add-exhibit.html', form=form)
 
 
 # Run program -----------------------------------------------------------------
