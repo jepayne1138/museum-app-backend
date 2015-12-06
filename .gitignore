@@ -2,4 +2,8 @@ __pycache__
 venv*
 *.sublime*
 *.db
+*.pyc
+*.pyo
+*.json
 .DS_Store
+database.pyc forms.pyc marshallers.pyc
