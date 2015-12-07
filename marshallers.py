@@ -3,6 +3,7 @@ from flask.ext.restful import fields
 
 # Helper nested marshallers
 exhibit = {
+    'exhibitID': fields.Integer,
     'name': fields.String,
     'exhibitSectionID': fields.Integer,
     'viewControllerID': fields.Integer,
@@ -29,6 +30,7 @@ event = {
 
 # Main API return marshallers
 view_controller = {
+    'viewControllerID': fields.Integer,
     'name': fields.String,
     'segueID': fields.String,
     'revision': fields.Integer,
