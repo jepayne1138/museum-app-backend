@@ -7,6 +7,7 @@ exhibit = {
     'name': fields.String,
     'exhibitSectionID': fields.Integer,
     'viewControllerID': fields.Integer,
+    'title': fields.String,
     'text': fields.String,
     'resourceID': fields.Integer,
 }
