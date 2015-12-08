@@ -172,7 +172,6 @@ def main(args):
                     parsed_dict['endTime'] = datetime.strptime(parsed_dict['endTime'], '%Y-%m-%d %H:%M:%S')
                 if parsed_dict[id_name] == '0':
                     del parsed_dict[id_name]
-                print(parsed_dict)
                 sessionAdd(model(**parsed_dict))
 
         # Commit the changes
