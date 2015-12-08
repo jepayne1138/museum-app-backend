@@ -11,7 +11,7 @@ exhibit = {
     'resourceID': fields.Integer,
 }
 exhibit_section = {
-    'exhibitsSectionID': fields.Integer,
+    'exhibitSectionID': fields.Integer,
     'name': fields.String,
 }
 resource = {
