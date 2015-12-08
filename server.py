@@ -2,6 +2,8 @@
 http://flask.pocoo.org/docs/0.10/patterns/wtforms/
 """
 import argparse
+import csv
+from datetime import datetime
 from flask import Flask, render_template, request, redirect, url_for
 from database import db_session, init_db, \
                      ViewController, MetadataInteger, Exhibit, ExhibitSection, \
@@ -9,10 +11,24 @@ from database import db_session, init_db, \
 import marshallers
 import forms
 from flask.ext.restful import Resource, Api, marshal_with, reqparse
+from sqlalchemy import inspect
+from sqlalchemy.orm.properties import ColumnProperty
 from sqlalchemy.exc import IntegrityError
 
 app = Flask(__name__)
 
+csv_sort_order = {
+    'ViewController': 1,
+    'MediaResource': 1,
+    'MetadataInteger': 1,
+    'Event': 2,
+    'ExhibitSection': 2,
+    'Exhibit': 3,
+}
+
+
+def csv_sort(row):
+    return csv_sort_order[row[0]]
 
 # Database ORM ----------------------------------------------------------------
 
@@ -32,41 +48,6 @@ def sessionAdd(obj):
 
 # Setup database
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False  # To suppress warning, can set to True if needed in future
-
-
-# Create the database schema if it doesn't exist
-init_db()
-
-# Define database schema
-
-# Initialize the revision number
-sessionAdd(MetadataInteger(key='revision', value=0))
-db_session.commit()
-# Get the current revision number
-revision = MetadataInteger.query.filter_by(key='revision').first().value
-
-# Define ViewController objects
-view_controllers = {
-    'text': ViewController(key='text', name='ExhibitTextViewController', segueID='toExhibitTextViewController', revision=revision),
-    # 'image': ViewController(key='image', name='ExhibitImageViewController', segueID='toExhibitImageViewController', revision=revision),
-    # 'video': ViewController(key='video', name='ExhibitVideoViewController', segueID='toExhibitVideoViewController', revision=revision),
-    # 'audio': ViewController(key='audio', name='ExhibitAudioViewController', segueID='toExhibitAudioViewController', revision=revision),
-    # 'web': ViewController(key='web', name='ExhibitWebViewController', segueID='toExhibitWebViewController', revision=revision),
-}
-# Initialize default empty exhibit section entry
-sessionAdd(ExhibitSection(exhibitSectionID=1, name=None, revision=revision))
-db_session.commit()
-# Initialize default empty resource entry
-sessionAdd(MediaResource(resourceID=1, url='', revision=revision))
-db_session.commit()
-
-
-# Populate default view controllers
-for name, vc in view_controllers.items():
-    sessionAdd(vc)
-db_session.commit()
-# Update view controller dictionary - Only necessary if going to programatically add Exhibits here
-# view_controllers.update({vc.Key: vc for vc in ViewController.query.all()})
 
 
 # API -------------------------------------------------------------------------
@@ -139,6 +120,7 @@ def index():
 @app.route('/add-exhibit', methods=['GET', 'POST'])
 def add_exhibit():
     form = forms.ExhibitForm(request.form)
+    revision = MetadataInteger.query.filter_by(key='revision').first().value
     if request.method == 'POST' and form.validate():
         new_exhibit = Exhibit(
             name=form.name.data,
@@ -157,6 +139,47 @@ def add_exhibit():
 
 # Run program -----------------------------------------------------------------
 
+def main(args):
+    # Create the database schema if it doesn't exist
+    init_db()
+
+    # Initialize the revision number
+    sessionAdd(MetadataInteger(key='revision', value=0))
+    db_session.commit()
+    # Get the current revision number
+    revision = MetadataInteger.query.filter_by(key='revision').first()
+
+    # Populate date from csv
+    if args.csv:
+        revision.value += 1
+        with open(args.csv, 'r') as csv_file:
+            db_reader = csv.reader(csv_file)
+            # Sort the input so that foreign keys will be satisfied
+            sorted_list = sorted(list(db_reader), key=csv_sort)
+            # Parse csv and convert to database entries (Needs more error handling)
+            # Currently assumes perfect input
+            for row in sorted_list:
+                model_name = row[0]
+                model = globals()[model_name]
+                mapper = inspect(model)
+                values = row[1:]
+                values.append(int(revision.value))
+                columns = [x.key for x in mapper.attrs if isinstance(x, ColumnProperty)]
+                id_name = columns[0]
+                parsed_dict = dict(zip(columns, values))
+                if model_name == 'Event':
+                    parsed_dict['startTime'] = datetime.strptime(parsed_dict['startTime'], '%Y-%m-%d %H:%M:%S')
+                    parsed_dict['endTime'] = datetime.strptime(parsed_dict['endTime'], '%Y-%m-%d %H:%M:%S')
+                if parsed_dict[id_name] == '0':
+                    del parsed_dict[id_name]
+                sessionAdd(model(**parsed_dict))
+
+        # Commit the changes
+        db_session.commit()
+
+    # Run the server
+    app.run(host=args.address, port=args.port, debug=False)
+
 
 if __name__ == '__main__':
     # Parse command line arguments
@@ -171,6 +194,10 @@ if __name__ == '__main__':
         '-p', '--port', type=int, default=5000,
         help='Port for running the server'
     )
+    parser.add_argument(
+        '-c', '--csv', type=str, default='',
+        help='Populate the database from a given .csv file'
+    )
     args = parser.parse_args()
 
-    app.run(host=args.address, port=args.port, debug=False)
+    main(args)

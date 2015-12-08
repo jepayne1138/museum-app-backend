@@ -1,9 +1,9 @@
 import os
-from sqlalchemy import create_engine, Column, Integer, String, DateTime, ForeignKey, func
+from sqlalchemy import create_engine, Column, Integer, String, DateTime, ForeignKey
 from sqlalchemy.orm import scoped_session, sessionmaker, relationship
 from sqlalchemy.ext.declarative import declarative_base
 
-DB_PATH = os.path.join(os.getcwd(), 'test.db')
+DB_PATH = os.path.join(os.getcwd(), 'museum_backend.db')
 
 engine = create_engine('sqlite:///{}'.format(DB_PATH), convert_unicode=True)
 db_session = scoped_session(
@@ -28,6 +28,7 @@ class ExhibitSection(Base):
     exhibits = relationship('Exhibit', backref='exhibitSection')
     revision = Column(Integer)
 
+
 class Exhibit(Base):
 
     __tablename__ = 'Exhibits'
@@ -37,7 +38,6 @@ class Exhibit(Base):
     exhibitSectionID = Column(Integer, ForeignKey('ExhbitSections.exhibitSectionID'))
     viewControllerID = Column(Integer, ForeignKey('ViewControllers.viewControllerID'))
     viewController = relationship('ViewController')
-    title = Column(String)
     text = Column(String)
     resourceID = Column(Integer, ForeignKey('Resources.resourceID'))
     resource = relationship('MediaResource')
@@ -49,7 +49,6 @@ class ViewController(Base):
     __tablename__ = 'ViewControllers'
 
     viewControllerID = Column(Integer, primary_key=True)
-    key = Column(String, unique=True)
     name = Column(String, unique=True)
     segueID = Column(String, unique=True)
     revision = Column(Integer)
@@ -77,6 +76,7 @@ class MediaResource(Base):
     url = Column(String, unique=True)
     revision = Column(Integer)
 
+
 class MetadataInteger(Base):
 
     __tablename__ = 'Metadata'
@@ -84,6 +84,7 @@ class MetadataInteger(Base):
     metadataIntegerID = Column(Integer, primary_key=True)
     key = Column(String, unique=True)
     value = Column(Integer)
+
 
 def init_db():
     Base.metadata.create_all(bind=engine)
