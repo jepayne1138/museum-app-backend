@@ -2,7 +2,7 @@
 http://flask.pocoo.org/docs/0.10/patterns/wtforms/
 """
 import argparse
-from flask import Flask, render_template, flash, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for
 from database import db_session, init_db, \
                      ViewController, MetadataInteger, Exhibit, ExhibitSection, \
                      MediaResource, Event
@@ -10,6 +10,12 @@ import marshallers
 import forms
 from flask.ext.restful import Resource, Api, marshal_with, reqparse
 from sqlalchemy.exc import IntegrityError
+from OpenSSL import SSL
+
+# Set up SSL Context
+context = SSL.Context(SSL.SSLv23_METHOD)
+context.use_privatekey_file('server.key')
+context.use_certificate_file('server.crt')
 
 app = Flask(__name__)
 
@@ -28,7 +34,6 @@ def sessionAdd(obj):
         db_session.flush()
     except IntegrityError:
         db_session.rollback()
-
 
 
 # Setup database
@@ -136,6 +141,7 @@ api.add_resource(UpdateAPI, '/update', endpoint='update')
 def index():
     return render_template('index.html')
 
+
 @app.route('/add-exhibit', methods=['GET', 'POST'])
 def add_exhibit():
     form = forms.ExhibitForm(request.form)
@@ -173,4 +179,4 @@ if __name__ == '__main__':
     )
     args = parser.parse_args()
 
-    app.run(host=args.address, port=args.port, debug=False)
+    app.run(host=args.address, port=args.port, debug=False, ssl_context=context)
