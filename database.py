@@ -37,6 +37,7 @@ class Exhibit(Base):
     exhibitSectionID = Column(Integer, ForeignKey('ExhbitSections.exhibitSectionID'))
     viewControllerID = Column(Integer, ForeignKey('ViewControllers.viewControllerID'))
     viewController = relationship('ViewController')
+    title = Column(String)
     text = Column(String)
     resourceID = Column(Integer, ForeignKey('Resources.resourceID'))
     resource = relationship('MediaResource')
