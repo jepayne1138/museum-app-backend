@@ -2,7 +2,7 @@
 http://flask.pocoo.org/docs/0.10/patterns/wtforms/
 """
 import argparse
-from flask import Flask, render_template, flash, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for
 from database import db_session, init_db, \
                      ViewController, MetadataInteger, Exhibit, ExhibitSection, \
                      MediaResource, Event
@@ -28,7 +28,6 @@ def sessionAdd(obj):
         db_session.flush()
     except IntegrityError:
         db_session.rollback()
-
 
 
 # Setup database
@@ -135,6 +134,7 @@ api.add_resource(UpdateAPI, '/update', endpoint='update')
 @app.route('/index')
 def index():
     return render_template('index.html')
+
 
 @app.route('/add-exhibit', methods=['GET', 'POST'])
 def add_exhibit():
