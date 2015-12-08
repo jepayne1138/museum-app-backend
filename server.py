@@ -10,12 +10,6 @@ import marshallers
 import forms
 from flask.ext.restful import Resource, Api, marshal_with, reqparse
 from sqlalchemy.exc import IntegrityError
-from OpenSSL import SSL
-
-# Set up SSL Context
-context = SSL.Context(SSL.SSLv23_METHOD)
-context.use_privatekey_file('server.key')
-context.use_certificate_file('server.crt')
 
 app = Flask(__name__)
 
@@ -179,4 +173,4 @@ if __name__ == '__main__':
     )
     args = parser.parse_args()
 
-    app.run(host=args.address, port=args.port, debug=False, ssl_context=context)
+    app.run(host=args.address, port=args.port, debug=False)
