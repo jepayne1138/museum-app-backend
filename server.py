@@ -90,11 +90,13 @@ class UpdateAPI(Resource):
         revision = MetadataInteger.query.filter_by(key='revision').first().value
 
         # Get all table information
+        view_controllers = ViewController.query.filter(ViewController.revision > args.revision).all()
         exhibits = Exhibit.query.filter(Exhibit.revision > args.revision).all()
         exhibit_sections = ExhibitSection.query.filter(ExhibitSection.revision > args.revision).all()
         resources = MediaResource.query.filter(MediaResource.revision > args.revision).all()
         events = Event.query.filter(Event.revision > args.revision).all()
         return {
+            'view_controllers': view_controllers,
             'exhibits': exhibits,
             'exhibit_sections': exhibit_sections,
             'resources': resources,
