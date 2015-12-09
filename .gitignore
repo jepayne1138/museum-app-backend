@@ -8,4 +8,6 @@ venv*
 *.json
 *.csv
 .DS_Store
+*resources/*
+!*.gitkeep
 database.pyc forms.pyc marshallers.pyc
