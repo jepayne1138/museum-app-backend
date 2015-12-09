@@ -37,6 +37,7 @@ view_controller = {
 }
 
 update = {
+    'view_controllers': fields.List(fields.Nested(view_controller)),
     'exhibits': fields.List(fields.Nested(exhibit)),
     'exhibit_sections': fields.List(fields.Nested(exhibit_section)),
     'resources': fields.List(fields.Nested(resource)),
