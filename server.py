@@ -4,7 +4,8 @@ http://flask.pocoo.org/docs/0.10/patterns/wtforms/
 import argparse
 import csv
 from datetime import datetime
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, \
+                  send_from_directory
 from database import db_session, init_db, \
                      ViewController, MetadataInteger, Exhibit, ExhibitSection, \
                      MediaResource, Event
@@ -117,6 +118,11 @@ api.add_resource(UpdateAPI, '/update', endpoint='update')
 @app.route('/index')
 def index():
     return render_template('index.html')
+
+
+@app.route('/resources/<path:path>')
+def resoruce(path):
+    return send_from_directory('js', path)
 
 
 @app.route('/add-exhibit', methods=['GET', 'POST'])
