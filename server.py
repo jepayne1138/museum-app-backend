@@ -122,7 +122,7 @@ def index():
 
 @app.route('/resources/<path:path>')
 def resoruce(path):
-    return send_from_directory('js', path)
+    return send_from_directory('resources', path)
 
 
 @app.route('/add-exhibit', methods=['GET', 'POST'])
