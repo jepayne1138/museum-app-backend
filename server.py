@@ -132,14 +132,10 @@ def allowed_file(filename):
 
 
 @app.route('/')
-@app.route('/index', methods=['GET', 'POST'])
+@app.route('/index')
 def index():
     print('index')
-    revision = MetadataInteger.query.filter_by(key='revision').first()
-    if request.method == 'POST':
-        revision.value += 1
-        db_session.commit()
-    return render_template('index.html', revision_number=revision.value)
+    return render_template('index.html')
 
 
 @app.route('/resources/<path:path>')
@@ -158,10 +154,11 @@ def upload_file():
             upload_path = os.path.join(UPLOAD_PATH, filename)
             upload_file.save(upload_path)
             # Save to database
-            revision = MetadataInteger.query.filter_by(key='revision').first().value
+            revision = MetadataInteger.query.filter_by(key='revision').first()
+            revision.value += 1
             new_resource = MediaResource(
                 url=filename,
-                revision=revision,
+                revision=revision.value,
             )
             sessionAdd(new_resource)
             db_session.commit()
@@ -177,14 +174,15 @@ def upload_file():
 def add_exhibit():
     form = forms.ExhibitForm(request.form)
     if request.method == 'POST' and form.validate():
-        revision = MetadataInteger.query.filter_by(key='revision').first().value
+        revision = MetadataInteger.query.filter_by(key='revision').first()
+        revision.value += 1
         new_exhibit = Exhibit(
             name=form.name.data,
             exhibitSectionID=form.exhibit_section.data.exhibitSectionID,
             viewControllerID=form.view_controller.data.viewControllerID,
             text=form.text.data,
             resourceID=form.resource.data.resourceID,
-            revision=revision,
+            revision=revision.value,
         )
         sessionAdd(new_exhibit)
         db_session.commit()
@@ -197,10 +195,11 @@ def add_exhibit():
 def add_exhibit_section():
     form = forms.ExhibitSectionForm(request.form)
     if request.method == 'POST' and form.validate():
-        revision = MetadataInteger.query.filter_by(key='revision').first().value
+        revision = MetadataInteger.query.filter_by(key='revision').first()
+        revision.value += 1
         new_exhibit_section = ExhibitSection(
             name=form.name.data,
-            revision=revision,
+            revision=revision.value,
         )
         sessionAdd(new_exhibit_section)
         db_session.commit()
@@ -213,14 +212,15 @@ def add_exhibit_section():
 def add_event():
     form = forms.EventForm(request.form)
     if request.method == 'POST' and form.validate():
-        revision = MetadataInteger.query.filter_by(key='revision').first().value
+        revision = MetadataInteger.query.filter_by(key='revision').first()
+        revision.value += 1
         new_event = Event(
             name=form.name.data,
             description=form.description.data,
             resourceID=1,
             startTime=form.startTime.data,
             endTime=form.endTime.data,
-            revision=revision,
+            revision=revision.value,
         )
         sessionAdd(new_event)
         db_session.commit()
