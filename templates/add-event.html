@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+{% import 'macros.html' as macros %}
+<html lang='en'>
+<head>
+    <title>Museum App Database</title>
+</head>
+<body>
+
+{{ macros.title_link() }}
+
+<form method=post action="/add-event">
+  <dl>
+    {{ macros.render_field(form.name) }}
+    {{ macros.render_field(form.description) }}
+    {{ macros.render_field(form.startTime) }}
+    {{ macros.render_field(form.endTime) }}
+  </dl>
+  <p><input type=submit value=Submit>
+</form>
+
+</body>
+</html>

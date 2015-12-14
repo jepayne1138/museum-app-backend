@@ -132,9 +132,13 @@ def allowed_file(filename):
 
 
 @app.route('/')
-@app.route('/index')
+@app.route('/index', methods=['GET', 'POST'])
 def index():
-    return render_template('index.html')
+    revision = MetadataInteger.query.filter_by(key='revision').first()
+    if request.method == 'POST':
+        revision.value += 1
+        db_session.commit()
+    return render_template('index.html', revision_number=revision.value)
 
 
 @app.route('/resources/<path:path>')
@@ -186,6 +190,22 @@ def add_exhibit():
         return redirect(url_for('index'))
 
     return render_template('add-exhibit.html', form=form)
+
+
+@app.route('/add-exhibit-section', methods=['GET', 'POST'])
+def add_exhibit_section():
+    form = forms.ExhibitSectionForm(request.form)
+    if request.method == 'POST' and form.validate():
+        revision = MetadataInteger.query.filter_by(key='revision').first().value
+        new_exhibit_section = ExhibitSection(
+            name=form.name.data,
+            revision=revision,
+        )
+        sessionAdd(new_exhibit_section)
+        db_session.commit()
+        return redirect(url_for('index'))
+
+    return render_template('add-exhibit-section.html', form=form)
 
 
 @app.route('/add-event', methods=['GET', 'POST'])

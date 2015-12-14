@@ -1,5 +1,6 @@
 from wtforms import Form
-from wtforms.fields import TextField, TextAreaField, FileField, DateTimeField
+from wtforms.fields import TextField, TextAreaField, FileField, DateTimeField, \
+                           RadioField, FieldList
 from wtforms.validators import Length
 from wtforms.widgets import HTMLString, html_params
 
@@ -38,7 +39,7 @@ class DateTimePickerWidget(object):
 class ExhibitForm(Form):
     name = TextField('Exhibit Name', [Length(min=1)])
     text = TextAreaField('Text')
-    # resource
+    # resource = RadioField('Resouce', choices=[], coerce=int)
 
 
 class ResourceForm(Form):
@@ -51,3 +52,7 @@ class EventForm(Form):
     # resource
     startTime = DateTimeField('Start Time', widget=DateTimePickerWidget())
     endTime = DateTimeField('End Time', widget=DateTimePickerWidget())
+
+
+class ExhibitSectionForm(Form):
+    name = TextField('Exhibit Section Name', [Length(min=1)])
