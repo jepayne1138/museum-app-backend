@@ -9,7 +9,7 @@ from flask import Flask, render_template, request, redirect, url_for, \
                   send_from_directory
 from database import db_session, init_db, \
                      ViewController, MetadataInteger, Exhibit, ExhibitSection, \
-                     MediaResource, Event
+                     MediaResource, Event, Information
 import marshallers
 import forms
 from flask.ext.restful import Resource, Api, marshal_with, reqparse
@@ -24,6 +24,7 @@ UPLOAD_PATH = os.path.join(os.getcwd(), 'static', 'resources')
 app = Flask(__name__)
 
 csv_sort_order = {
+    'Information': 1,
     'ViewController': 1,
     'MediaResource': 1,
     'MetadataInteger': 1,
@@ -96,12 +97,14 @@ class UpdateAPI(Resource):
         revision = MetadataInteger.query.filter_by(key='revision').first().value
 
         # Get all table information
+        information = Information.query.filter(Information.revision > args.revision).all()
         view_controllers = ViewController.query.filter(ViewController.revision > args.revision).all()
         exhibits = Exhibit.query.filter(Exhibit.revision > args.revision).all()
         exhibit_sections = ExhibitSection.query.filter(ExhibitSection.revision > args.revision).all()
         resources = MediaResource.query.filter(MediaResource.revision > args.revision).all()
         events = Event.query.filter(Event.revision > args.revision).all()
         return {
+            'information': information,
             'view_controllers': view_controllers,
             'exhibits': exhibits,
             'exhibit_sections': exhibit_sections,

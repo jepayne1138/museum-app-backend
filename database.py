@@ -86,5 +86,17 @@ class MetadataInteger(Base):
     value = Column(Integer)
 
 
+class Information(Base):
+
+    __tablename__ = 'Information'
+
+    informationID = Column(Integer, primary_key=True)
+    information = Column(String)
+    parking = Column(String)
+    hours = Column(String)
+    location = Column(String)
+    revision = Column(Integer)
+
+
 def init_db():
     Base.metadata.create_all(bind=engine)
