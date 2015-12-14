@@ -42,7 +42,7 @@ def shutdown_session(exception=None):
 
 def sessionAdd(obj):
     try:
-        db_session.add(obj)
+        db_session.merge(obj)
         db_session.flush()
     except IntegrityError:
         db_session.rollback()
