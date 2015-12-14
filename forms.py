@@ -1,8 +1,10 @@
 from wtforms import Form
 from wtforms.fields import TextField, TextAreaField, FileField, DateTimeField, \
-                           RadioField, FieldList
+                           SelectField, FieldList
+from wtforms.ext.sqlalchemy.fields import QuerySelectField
 from wtforms.validators import Length
 from wtforms.widgets import HTMLString, html_params
+from database import MediaResource, ExhibitSection, ViewController
 
 
 ALLOWED_EXTENSIONS = set(['mp3', 'png', 'jpg', 'mp4'])
@@ -37,9 +39,23 @@ class DateTimePickerWidget(object):
 
 
 class ExhibitForm(Form):
+    view_controller = QuerySelectField('View Controller Type',
+        query_factory=ViewController.query.all,
+        get_pk=lambda a: a.viewControllerID,
+        get_label=lambda a: a.name
+    )
     name = TextField('Exhibit Name', [Length(min=1)])
     text = TextAreaField('Text')
-    # resource = RadioField('Resouce', choices=[], coerce=int)
+    exhibit_section = QuerySelectField('Exhibit Seciton',
+        query_factory=ExhibitSection.query.all,
+        get_pk=lambda a: a.exhibitSectionID,
+        get_label=lambda a: a.name
+    )
+    resource = QuerySelectField('Resource',
+        query_factory=MediaResource.query.all,
+        get_pk=lambda a: a.resourceID,
+        get_label=lambda a: a.url
+    )
 
 
 class ResourceForm(Form):

@@ -134,6 +134,7 @@ def allowed_file(filename):
 @app.route('/')
 @app.route('/index', methods=['GET', 'POST'])
 def index():
+    print('index')
     revision = MetadataInteger.query.filter_by(key='revision').first()
     if request.method == 'POST':
         revision.value += 1
@@ -179,10 +180,10 @@ def add_exhibit():
         revision = MetadataInteger.query.filter_by(key='revision').first().value
         new_exhibit = Exhibit(
             name=form.name.data,
-            exhibitSectionID=1,
-            viewControllerID=1,
+            exhibitSectionID=form.exhibit_section.data.exhibitSectionID,
+            viewControllerID=form.view_controller.data.viewControllerID,
             text=form.text.data,
-            resourceID=1,
+            resourceID=form.resource.data.resourceID,
             revision=revision,
         )
         sessionAdd(new_exhibit)

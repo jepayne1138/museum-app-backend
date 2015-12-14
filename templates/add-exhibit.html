@@ -10,8 +10,11 @@
 
 <form method=post action="/add-exhibit">
   <dl>
+    {{ macros.render_field(form.view_controller) }}
     {{ macros.render_field(form.name) }}
     {{ macros.render_field(form.text) }}
+    {{ macros.render_field(form.exhibit_section) }}
+    {{ macros.render_field(form.resource) }}
   </dl>
   <p><input type=submit value=Submit>
 </form>
