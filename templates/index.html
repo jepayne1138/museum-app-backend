@@ -5,9 +5,11 @@
 </head>
 <body>
 
-<h1>Museum App Database</h1>
+{% import 'macros.html' as macros %}
+{{ macros.title_link() }}
 
-<a href="{{ url_for('add_exhibit') }}">Add Exhibit</a>
+<p><a href="{{ url_for('add_exhibit') }}">Add Exhibit</a>
+<p><a href="{{ url_for('upload_file') }}">Add Resource</a>
 
 </body>
 </html>

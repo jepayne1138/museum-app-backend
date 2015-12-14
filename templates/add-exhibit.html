@@ -1,17 +1,17 @@
 <!DOCTYPE html>
+{% import 'macros.html' as macros %}
 <html lang='en'>
 <head>
     <title>Museum App Database</title>
 </head>
 <body>
 
-<h1>Museum App Database</h1>
+{{ macros.title_link() }}
 
-{% from "_formhelpers.html" import render_field %}
 <form method=post action="/add-exhibit">
   <dl>
-    {{ render_field(form.name) }}
-    {{ render_field(form.text) }}
+    {{ macros.render_field(form.name) }}
+    {{ macros.render_field(form.text) }}
   </dl>
   <p><input type=submit value=Submit>
 </form>
