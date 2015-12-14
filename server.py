@@ -13,9 +13,13 @@ from database import db_session, init_db, \
 import marshallers
 import forms
 from flask.ext.restful import Resource, Api, marshal_with, reqparse
+from werkzeug import secure_filename
 from sqlalchemy import inspect
 from sqlalchemy.orm.properties import ColumnProperty
 from sqlalchemy.exc import IntegrityError
+
+
+UPLOAD_PATH = os.path.join(os.getcwd(), 'static', 'resources')
 
 app = Flask(__name__)
 
@@ -112,6 +116,17 @@ api.add_resource(ViewControllerListAPI, '/viewcontrollers', endpoint='viewcontro
 api.add_resource(UpdateAPI, '/update', endpoint='update')
 
 
+# File upload handlers --------------------------------------------------------
+
+
+ALLOWED_EXTENSIONS = set(['mp3', 'png', 'jpg', 'mp4'])
+
+app.config['UPLOAD_FOLDER'] = UPLOAD_PATH
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
+
+
 # Web interface ---------------------------------------------------------------
 
 
@@ -123,8 +138,23 @@ def index():
 
 @app.route('/resources/<path:path>')
 def resoruce(path):
-    return send_from_directory(os.path.join(os.getcwd(), 'static', 'resources'), path)
+    return send_from_directory(UPLOAD_PATH, path)
 
+@app.route('/upload', methods=['GET', 'POST'])
+def upload_file():
+    form = forms.ResourceForm(request.form)
+    revision = MetadataInteger.query.filter_by(key='revision').first().value
+    if request.method == 'POST' and form.validate():
+        if allowed_file(form.upload.name):
+            filename = secure_filename(form.upload.name)
+            upload_data = request.FILES[filename].read()
+            with open(os.path.join(UPLOAD_PATH, form.upload.data), 'w') as upload_file:
+                upload_file.write(upload_data)
+        else:
+            # Put some kind of error page here
+            pass
+        return redirect(url_for('index'))
+    return render_template('add-resource.html', form=form)
 
 @app.route('/add-exhibit', methods=['GET', 'POST'])
 def add_exhibit():
