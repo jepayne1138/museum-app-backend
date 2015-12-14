@@ -17,7 +17,6 @@ from werkzeug import secure_filename
 from sqlalchemy import inspect
 from sqlalchemy.orm.properties import ColumnProperty
 from sqlalchemy.exc import IntegrityError
-import traceback
 
 
 UPLOAD_PATH = os.path.join(os.getcwd(), 'static', 'resources')
@@ -146,7 +145,6 @@ def resoruce(path):
 @app.route('/upload', methods=['GET', 'POST'])
 def upload_file():
     form = forms.ResourceForm(request.form)
-    revision = MetadataInteger.query.filter_by(key='revision').first().value
     if request.method == 'POST' and request.files[form.upload.name].filename:
         raw_filename = request.files[form.upload.name].filename
         if allowed_file(raw_filename):
@@ -154,6 +152,8 @@ def upload_file():
             upload_file = request.files[form.upload.name]
             upload_path = os.path.join(UPLOAD_PATH, filename)
             upload_file.save(upload_path)
+            # Save to database
+            revision = MetadataInteger.query.filter_by(key='revision').first().value
             new_resource = MediaResource(
                 url=filename,
                 revision=revision,
@@ -171,8 +171,8 @@ def upload_file():
 @app.route('/add-exhibit', methods=['GET', 'POST'])
 def add_exhibit():
     form = forms.ExhibitForm(request.form)
-    revision = MetadataInteger.query.filter_by(key='revision').first().value
     if request.method == 'POST' and form.validate():
+        revision = MetadataInteger.query.filter_by(key='revision').first().value
         new_exhibit = Exhibit(
             name=form.name.data,
             exhibitSectionID=1,
@@ -186,6 +186,26 @@ def add_exhibit():
         return redirect(url_for('index'))
 
     return render_template('add-exhibit.html', form=form)
+
+
+@app.route('/add-event', methods=['GET', 'POST'])
+def add_event():
+    form = forms.EventForm(request.form)
+    if request.method == 'POST' and form.validate():
+        revision = MetadataInteger.query.filter_by(key='revision').first().value
+        new_event = Event(
+            name=form.name.data,
+            description=form.description.data,
+            resourceID=1,
+            startTime=form.startTime.data,
+            endTime=form.endTime.data,
+            revision=revision,
+        )
+        sessionAdd(new_event)
+        db_session.commit()
+        return redirect(url_for('index'))
+
+    return render_template('add-event.html', form=form)
 
 
 # Run program -----------------------------------------------------------------
