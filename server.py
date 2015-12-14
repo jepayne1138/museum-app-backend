@@ -1,6 +1,7 @@
 """Note that _formhelpers.html was taken from flask documentation
 http://flask.pocoo.org/docs/0.10/patterns/wtforms/
 """
+import os
 import argparse
 import csv
 from datetime import datetime
@@ -122,7 +123,7 @@ def index():
 
 @app.route('/resources/<path:path>')
 def resoruce(path):
-    return send_from_directory('resources', path)
+    return send_from_directory(os.path.join(os.getcwd(), 'static', 'resources'), path)
 
 
 @app.route('/add-exhibit', methods=['GET', 'POST'])
