@@ -146,12 +146,21 @@ def resoruce(path):
 @app.route('/upload', methods=['GET', 'POST'])
 def upload_file():
     form = forms.ResourceForm(request.form)
+    revision = MetadataInteger.query.filter_by(key='revision').first().value
     if request.method == 'POST' and request.files[form.upload.name].filename:
         raw_filename = request.files[form.upload.name].filename
         if allowed_file(raw_filename):
             filename = secure_filename(raw_filename)
             upload_file = request.files[form.upload.name]
-            upload_file.save(os.path.join(UPLOAD_PATH, filename))
+            upload_path = os.path.join(UPLOAD_PATH, filename)
+            upload_file.save(upload_path)
+            new_resource = MediaResource(
+                url=filename,
+                revision=revision,
+            )
+            sessionAdd(new_resource)
+            db_session.commit()
+
         else:
             # Put some kind of error page here
             print('Failed to upload file')
